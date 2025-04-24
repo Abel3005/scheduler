@@ -88,7 +88,7 @@ async def pulic_calendar(link:str):
             r_cal.add_component(event)
 
     return Response(
-        content=cal.to_ical(),
+        content=r_cal.to_ical(),
         media_type="text/calendar",
         headers={"Content-Disposition":f'attachment; filename="calendar_{author}.ics"'}
     )
