@@ -8,8 +8,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. 앱 소스 복사
-COPY . .
+# 4. 앱 소스 복사 -> 호스트 파일 사용으로 변경
+VOLUME ["/app"]
 
 # 5. 포트 지정 & 실행
 EXPOSE 8080
