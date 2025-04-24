@@ -1,2 +1,3 @@
-# scheduler
-for calendar2notion
+## Tasks
+- Oracle cloud: docker-test & ghcr 배포
+- 
