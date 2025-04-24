@@ -69,6 +69,11 @@ async def pulic_calendar(link:str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing iCal data: {e}")
     cal = Calendar.from_ical(response.content)
+    r_cal = Calendar()
+    r_cal.add("version","2.0")
+    r_cal.add("prodid","-//100yaa//iCal Export//KO")
+    r_cal.add("x-apple-calendar-color","#CC73E1EF")
+    r_cal.add("x-wr-calname",author)
     for component in cal.walk():
         if component.name == "VEVENT":
             match = re.search(r'\[(.*?)\]',str(component.get("summary")))
@@ -80,7 +85,7 @@ async def pulic_calendar(link:str):
             event.add("uid", component.get("uid"))
             event.add("location", component.get("location"))
             event.add("description", component.get("description"))
-            cal.add_component(event)
+            r_cal.add_component(event)
 
     return Response(
         content=cal.to_ical(),
