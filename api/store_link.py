@@ -51,9 +51,7 @@ async def store_link(link: str):
 @router.get("/public-calendar")
 async def pulic_calendar(link:str):
     db = SessionLocal()
-    cal = Calendar()
-    cal.add("prodid", "-//100yaa//iCal Export//EN")
-    cal.add("version", "2.0")
+    
     try:
         # Convert webcal:// to https:// if necessary
         if link.startswith("webcal://"):
@@ -70,7 +68,7 @@ async def pulic_calendar(link:str):
         raise HTTPException(status_code=400, detail=f"Failed to fetch iCal data: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing iCal data: {e}")
-    
+    cal = Calendar.from_ical(response.content)
     for component in cal.walk():
         if component.name == "VEVENT":
             match = re.search(r'\[(.*?)\]',str(component.get("summary")))
