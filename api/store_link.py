@@ -46,7 +46,7 @@ async def store_link(link: str):
         db.close()
 
 @router.get("/extract-calendar")
-async def extract_calendar(link: str):
+async def extract_calendar(link: str, author:str):
     try:
         # Convert webcal:// to https:// if necessary
         if link.startswith("webcal://"):
@@ -57,7 +57,7 @@ async def extract_calendar(link: str):
         response.raise_for_status()
 
         # Parse the iCal data
-        events = parse_ical_from_bytes(response.content)
+        events = parse_ical_from_bytes(response.content,author)
         return {"status": "success", "events": events}
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch iCal data: {e}")
