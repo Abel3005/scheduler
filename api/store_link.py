@@ -1,9 +1,10 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, Response, HTTPException
 from util.ical_parser import parse_ical_from_bytes
+from icalendar import Calendar, Event
 from sqlalchemy import create_engine, Column, String, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import json
+import json, re
 import requests
 
 router = APIRouter()
@@ -50,6 +51,9 @@ async def store_link(link: str):
 @router.get("/public-calendar")
 async def pulic_calendar(link:str):
     db = SessionLocal()
+    cal = Calendar()
+    cal.add("prodid", "-//100yaa//iCal Export//EN")
+    cal.add("version", "2.0")
     try:
         # Convert webcal:// to https:// if necessary
         if link.startswith("webcal://"):
@@ -62,15 +66,30 @@ async def pulic_calendar(link:str):
 
         response = requests.get(link)
         response.raise_for_status()
-
-        # Parse the iCal data
-        events = parse_ical_from_bytes(response.content,author)
-        return {"status": "success", "events": events}
-    
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch iCal data: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing iCal data: {e}")
+    
+    for component in cal.walk():
+        if component.name == "VEVENT":
+            match = re.search(r'\[(.*?)\]',str(component.get("summary")))
+            event = Event()
+            event.add("summary",match.group(1) if match else author)
+            event.add("dtstart", component.get("dtstart").dt)
+            event.add("dtend", component.get("dtend").dt)
+            event.add("dtstamp", component.get("dtstamp").dt)
+            event.add("uid", component.get("uid"))
+            event.add("location", component.get("location"))
+            event.add("description", component.get("description"))
+            cal.add_component(event)
+
+    return Response(
+        content=cal.to_ical(),
+        media_type="text/calendar",
+        headers={"Content-Disposition":f'attachment; filename="calendar_{author}.ics"'}
+    )
+
 
 @router.get("/extract-calendar")
 async def extract_calendar(link: str, author:str):
