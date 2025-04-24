@@ -48,6 +48,10 @@ async def store_link(link: str):
 @router.get("/extract-calendar")
 async def extract_calendar(link: str):
     try:
+        # Convert webcal:// to https:// if necessary
+        if link.startswith("webcal://"):
+            link = link.replace("webcal://", "https://", 1)
+
         # Fetch the iCal data from the link
         response = requests.get(link)
         response.raise_for_status()
