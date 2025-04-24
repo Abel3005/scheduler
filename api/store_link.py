@@ -24,6 +24,8 @@ class PublicLink(Base):
     __tablename__ = "public_links"
     id = Column(Integer, primary_key=True, index=True)
     link = Column(String, unique=True, index=True)
+    author = Column(String, unique=True, index=True)
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -44,6 +46,31 @@ async def store_link(link: str):
         return {"message": "Link stored successfully", "link": new_link.link}
     finally:
         db.close()
+
+@router.get("/public-calendar")
+async def pulic_calendar(link:str):
+    db = SessionLocal()
+    try:
+        # Convert webcal:// to https:// if necessary
+        if link.startswith("webcal://"):
+            link = link.replace("webcal://", "https://", 1)
+        existing_link = db.query(PublicLink).filter(PublicLink.link == link).first()
+        if existing_link:
+            author = existing_link.author
+        else:
+            author = "TEST"
+
+        response = requests.get(link)
+        response.raise_for_status()
+
+        # Parse the iCal data
+        events = parse_ical_from_bytes(response.content,author)
+        return {"status": "success", "events": events}
+    
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch iCal data: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error parsing iCal data: {e}")
 
 @router.get("/extract-calendar")
 async def extract_calendar(link: str, author:str):
