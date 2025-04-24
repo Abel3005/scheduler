@@ -4,6 +4,9 @@ FROM python:3.11-slim
 # PostgreSQL 클라이언트 및 개발 패키지 설치
 RUN apt-get update && apt-get install -y postgresql-client libpq-dev && rm -rf /var/lib/apt/lists/*
 
+# 빌드 도구 설치 (gcc 포함)
+RUN apt-get update && apt-get install -y build-essential gcc && rm -rf /var/lib/apt/lists/*
+
 # 2. 작업 디렉토리
 WORKDIR /app
 
