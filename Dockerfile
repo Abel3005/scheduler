@@ -1,8 +1,8 @@
 # 1. 베이스 이미지
 FROM python:3.11-slim
 
-# PostgreSQL 클라이언트 설치
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+# PostgreSQL 클라이언트 및 개발 패키지 설치
+RUN apt-get update && apt-get install -y postgresql-client libpq-dev && rm -rf /var/lib/apt/lists/*
 
 # 2. 작업 디렉토리
 WORKDIR /app
