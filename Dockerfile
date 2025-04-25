@@ -19,4 +19,4 @@ VOLUME ["/app"]
 
 # 5. 포트 지정 & 실행
 EXPOSE 8080
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0","ssl-keyfile=/etc/letsencrypt/live/newjerusalem12.store/privkey.pem","ssl-certfile=/etc/letsencrypt/live/newjerusalem12.store/fullchain.pem","--port", "443"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0","--ssl-keyfile=/etc/letsencrypt/live/newjerusalem12.store/privkey.pem","--ssl-certfile=/etc/letsencrypt/live/newjerusalem12.store/fullchain.pem","--port", "443"]
