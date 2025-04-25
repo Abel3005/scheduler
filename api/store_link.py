@@ -31,7 +31,7 @@ class PublicLink(Base):
 Base.metadata.create_all(bind=engine)
 
 @router.post("/store-link")
-async def store_link(link: str):
+async def store_link(link: str, author:str):
     db = SessionLocal()
     try:
         # Check if the link already exists
@@ -40,11 +40,11 @@ async def store_link(link: str):
             raise HTTPException(status_code=400, detail="Link already exists")
 
         # Add the new link
-        new_link = PublicLink(link=link)
+        new_link = PublicLink(link=link,author=author)
         db.add(new_link)
         db.commit()
         db.refresh(new_link)
-        return {"message": "Link stored successfully", "link": new_link.link}
+        return {"message": "Link stored successfully", "link": new_link.link, "author": new_link.author}
     finally:
         db.close()
 
