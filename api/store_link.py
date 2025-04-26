@@ -51,17 +51,15 @@ async def store_link(link: str, author:str):
 @router.get("/public-calendar")
 async def pulic_calendar(link:str):
     db = SessionLocal()
-    
     try:
         # Convert webcal:// to https:// if necessary
-        if link.startswith("webcal://"):
-            link = link.replace("webcal://", "https://", 1)
         existing_link = db.query(PublicLink).filter(PublicLink.link == link).first()
         if existing_link:
             author = existing_link.author
         else:
             author = "TEST"
-
+        if link.startswith("webcal://"):
+            link = link.replace("webcal://", "https://", 1)
         response = requests.get(link)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
